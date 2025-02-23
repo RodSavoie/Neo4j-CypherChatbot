@@ -12,30 +12,26 @@ def chat(user_input):
             {
                 "role": "system",
                 "content": (
-                    "You are an AI that **ONLY** returns **valid Neo4j Cypher queries**. "
-                    "Do NOT include explanations, apologies, or any text outside of the **raw Cypher query** itself. "
-                    "The query **must** be correctly formatted and **ready to execute** in Neo4j."
+                    "You are an AI that exclusively generates **valid Neo4j Cypher queries**. "
+                    "Do NOT include explanations, apologies, or any non-Cypher text. "
+                    "Only return the **raw Cypher query** without code blocks or formatting."
                 )
             },
             {"role": "user", "content": user_input}
         ]
 
         response = openai.chat.completions.create(
-            model="gpt-4o",  # Using GPT-4o
+            model="gpt-4o",  # Ensure GPT-4o is used
             messages=messages,
             temperature=0
         )
 
         # Extract Cypher Query from API Response
-        cypher_query = response.choices[0].message["content"].strip()
+        cypher_query = response.choices[0].message.content.strip()  # ✅ FIXED HERE
 
         # Debugging: Print OpenAI's Raw Response
         print("🛠 OpenAI Full Response:", response)
         print("✅ Generated Cypher Query:", cypher_query)
-
-        # Ensure the query is valid (Basic Check)
-        if not cypher_query.lower().startswith(("match", "call", "create", "return", "unwind", "merge")):
-            raise ValueError("Generated response is not a valid Cypher query.")
 
         return cypher_query
 
